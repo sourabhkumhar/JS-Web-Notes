@@ -4,16 +4,28 @@ console.log('Welcome to my Notes App');
 let addBtn = document.getElementById('addBtn');
 addBtn.addEventListener("click", function () {
     let addTxt = document.getElementById("addTxt");
+    let addHead = document.getElementById("addHead");
+    
     let notes = localStorage.getItem("notes");
-    if (notes == null) {
+    let titles = localStorage.getItem("titles");
+
+    if (notes == null && titles == null) {
         notesObj = [];
+        titlesObj = [];
     }
     else {
         notesObj = JSON.parse(notes);
+        titlesObj = JSON.parse(titles);
     }
+
     notesObj.push(addTxt.value);
+    titlesObj.push(addHead.value);
+
+    localStorage.setItem("titles", JSON.stringify(titlesObj));
     localStorage.setItem("notes", JSON.stringify(notesObj));
+    
     addTxt.value = "";
+    addHead.value = "";
     // console.log(notesObj);
     showNotes();
 })
@@ -28,10 +40,11 @@ function showNotes() {
     }
 
     let html = "";
+
     notesObj.forEach(function (element, index) {
         html += `<div class="noteCard my-2 mx-2 card" style="width: 18rem;">
         <div class="card-body">
-            <h5 class="card-title">Note ${index + 1}</h5>
+            <h5 class="card-title">${titlesObj[index]}</h5>
             <p class="card-text">${element}</p>
             <button id="${index}" onclick="deleteNote(this.id)" class="btn btn-primary">Delete Note</button>
         </div>
@@ -47,15 +60,20 @@ function showNotes() {
 function deleteNote(index) {
     // console.log('I am deleting', index);
 
+    let titles = localStorage.getItem("titles");
     let notes = localStorage.getItem("notes");
-    if (notes == null) {
+    if (notes == null && titles) {
         notesObj = [];
+        titlesObj = [];
     }
     else {
         notesObj = JSON.parse(notes);
+        titlesObj = JSON.parse(titles);
     }
 
     notesObj.splice(index, 1);
+    titlesObj.splice(index, 1);
+    localStorage.setItem("titles", JSON.stringify(titlesObj));
     localStorage.setItem("notes", JSON.stringify(notesObj));
     showNotes();
 }
@@ -68,9 +86,12 @@ search.addEventListener("input", function () {
     // console.log('Input Event fired!', inputVal);
 
     let noteCards = document.getElementsByClassName('noteCard');
+
     Array.from(noteCards).forEach(function (element) {
+        let cardTitle = element.getElementsByTagName("h5")[0].innerText;
         let cardTxt = element.getElementsByTagName("p")[0].innerText;
-        if (cardTxt.includes(inputVal)) {
+
+        if (cardTitle.includes(inputVal) || cardTxt.includes(inputVal)) {
             element.style.display = "block";
         }
         else {
